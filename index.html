@@ -18,7 +18,7 @@
     <button type="submit">Submit</button>
   </form>
 
-  <p id="status" style="color: green; font-weight: bold;"></p>
+  <p id="status" style="font-weight: bold;"></p>
 
   <script>
     const form = document.getElementById("surveyForm");
@@ -27,36 +27,43 @@
     const mobile = params.get("mobile");
 
     if (!mobile) {
-      alert("Mobile number missing in URL.");
+      alert("Mobile number is missing in the URL (use ?mobile=xxxxxxxxxx)");
       form.style.display = "none";
     }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const irrigated = form.irrigated.value;
 
-      // Send to backend
-      const response = await fetch("https://script.google.com/a/macros/ifmr.ac.in/s/AKfycbybIrvmU4QWlCudTE_Ud3dVwcO_pGZ27GvXspn8V5NshuHc7D3PGgWz4nO5kqD2lTpJ/exec", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          mobile: mobile,
-          irrigated: irrigated,
-          timestamp: new Date().toISOString()
-        })
-      });
+      try {
+        const response = await fetch("YOUR_SCRIPT_URL_HERE", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            mobile: mobile,
+            irrigated: irrigated
+          })
+        });
 
-      if (response.ok) {
-        statusText.textContent = "Thank you! Your response has been recorded.";
-        form.reset();
-      } else {
-        statusText.textContent = "Error submitting. Please try again.";
+        const result = await response.json();
+
+        if (result.status === "success") {
+          statusText.textContent = "✅ Response submitted successfully!";
+          statusText.style.color = "green";
+          form.reset();
+        } else {
+          statusText.textContent = "❌ Submission failed.";
+          statusText.style.color = "red";
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        statusText.textContent = "⚠️ Error sending data.";
         statusText.style.color = "red";
       }
     });
   </script>
 </body>
 </html>
+
