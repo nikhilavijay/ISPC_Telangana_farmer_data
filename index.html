@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Farmer Survey</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto;">
+  <h2>Have you irrigated your field today?</h2>
+
+  <form id="surveyForm">
+    <label>
+      <input type="radio" name="irrigated" value="Yes" required> Yes
+    </label><br><br>
+    <label>
+      <input type="radio" name="irrigated" value="No" required> No
+    </label><br><br>
+    <button type="submit">Submit</button>
+  </form>
+
+  <p id="status" style="color: green; font-weight: bold;"></p>
+
+  <script>
+    const form = document.getElementById("surveyForm");
+    const statusText = document.getElementById("status");
+    const params = new URLSearchParams(window.location.search);
+    const mobile = params.get("mobile");
+
+    if (!mobile) {
+      alert("Mobile number missing in URL.");
+      form.style.display = "none";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const irrigated = form.irrigated.value;
+
+      // Send to backend
+      const response = await fetch("https://your-backend.com/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          mobile: mobile,
+          irrigated: irrigated,
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        statusText.textContent = "Thank you! Your response has been recorded.";
+        form.reset();
+      } else {
+        statusText.textContent = "Error submitting. Please try again.";
+        statusText.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>
