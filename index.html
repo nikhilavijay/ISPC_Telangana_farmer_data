@@ -1,68 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Farmer Survey</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Irrigation Check</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      text-align: center;
+    }
+    button {
+      font-size: 1.5rem;
+      padding: 1rem 2rem;
+      margin: 1rem;
+      cursor: pointer;
+    }
+    #confirmation {
+      margin-top: 2rem;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
 </head>
-<body style="font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto;">
-  <h2>Have you irrigated your field today?</h2>
+<body>
+  <h1>Have you irrigated your field today?</h1>
+  <button onclick="submitResponse('Yes')">Yes</button>
+  <button onclick="submitResponse('No')">No</button>
 
-  <form id="surveyForm">
-    <label>
-      <input type="radio" name="irrigated" value="Yes" required> Yes
-    </label><br><br>
-    <label>
-      <input type="radio" name="irrigated" value="No" required> No
-    </label><br><br>
-    <button type="submit">Submit</button>
-  </form>
-
-  <p id="status" style="font-weight: bold;"></p>
+  <div id="confirmation"></div>
 
   <script>
-    const form = document.getElementById("surveyForm");
-    const statusText = document.getElementById("status");
-    const params = new URLSearchParams(window.location.search);
-    const mobile = params.get("mobile");
-
-    if (!mobile) {
-      alert("❗ Mobile number is missing in the URL. Add ?mobile=xxxxx");
-      form.style.display = "none";
+    function getMobileFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('mobile');
     }
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault(); // Prevent page reload
+    async function submitResponse(answer) {
+      const mobile = getMobileFromURL();
+      if (!mobile) {
+        alert('Mobile number not found in URL.');
+        return;
+      }
 
-      const irrigated = form.irrigated.value;
-
-      fetch("https://script.google.com/macros/s/AKfycbwGj6NKH3EzXx4axLeIhYcVg9jGfLgjTCAuSXBehjzuWG5QDFMFw4ON0X92dUrpleDJTQ/exec", {
-        method: "POST",
+      const response = await 
+      fetch('https://script.google.com/macros/s/AKfycbwhzil_3YdCZRSvqcUZzrhzk_2JfpF1KeA69bSuRlx4rNgxPgZ50-B8uI0LzpHQt1vr/exec'
+       , {
+        method: 'POST',
+        mode: 'no-cors', // So CORS doesn't block it
         headers: {
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           mobile: mobile,
-          irrigated: irrigated
+          response: answer,
+          timestamp: new Date().toISOString()
         })
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === "success") {
-            statusText.textContent = "✅ Your response has been recorded. Thank you!";
-            statusText.style.color = "green";
-            form.style.display = "none";
-          } else {
-            statusText.textContent = "❌ Submission failed.";
-            statusText.style.color = "red";
-          }
-        })
-        .catch(error => {
-          console.error("Error:", error);
-          statusText.textContent = "⚠️ Error submitting data.";
-          statusText.style.color = "red";
-        });
-    });
+      });
+
+      document.getElementById('confirmation').textContent = "Thank you! Your response has been recorded.";
+    }
   </script>
 </body>
 </html>
