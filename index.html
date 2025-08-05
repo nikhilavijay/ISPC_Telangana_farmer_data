@@ -27,45 +27,42 @@
     const mobile = params.get("mobile");
 
     if (!mobile) {
-      alert("Mobile number is missing in the URL (use ?mobile=xxxxxxxxxx)");
+      alert("❗ Mobile number is missing in the URL. Add ?mobile=xxxxx");
       form.style.display = "none";
     }
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    form.addEventListener("submit", function (e) {
+      e.preventDefault(); // Prevent page reload
+
       const irrigated = form.irrigated.value;
 
-      try {
-         const response = await 
-fetch("https://script.google.com/macros/s/AKfycby4CGz5oHp6UOCLiH2Yw9UpWDtaLsgjwC1jOt8Tl9MBQKO8lun7cOuWgmckpdjJcgv4/exec
-", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            mobile: mobile,
-            irrigated: irrigated
-          })
-        });
-
-        const result = await response.json();
-
-        if (result.status === "success") {
-          statusText.textContent = "✅ Response submitted successfully!";
-          statusText.style.color = "green";
-          form.reset();
-        } else {
-          statusText.textContent = "❌ Submission failed.";
+      fetch("https://script.google.com/macros/s/AKfycbwGj6NKH3EzXx4axLeIhYcVg9jGfLgjTCAuSXBehjzuWG5QDFMFw4ON0X92dUrpleDJTQ/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          mobile: mobile,
+          irrigated: irrigated
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success") {
+            statusText.textContent = "✅ Your response has been recorded. Thank you!";
+            statusText.style.color = "green";
+            form.style.display = "none";
+          } else {
+            statusText.textContent = "❌ Submission failed.";
+            statusText.style.color = "red";
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          statusText.textContent = "⚠️ Error submitting data.";
           statusText.style.color = "red";
-        }
-      } catch (err) {
-        console.error("Error:", err);
-        statusText.textContent = "⚠️ Error sending data.";
-        statusText.style.color = "red";
-      }
+        });
     });
   </script>
 </body>
 </html>
-
